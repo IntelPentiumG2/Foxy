@@ -1,6 +1,12 @@
+<div align="center">
+
+<img src="versions/26.1.2/src/main/resources/assets/foxy/icon.png" width="256" alt="Foxy">
+
 # Foxy
 
-Loads [Voxy](https://modrinth.com/mod/voxy) on NeoForge.
+Loads Voxy on NeoForge.
+
+</div>
 
 Voxy is a Fabric LoD rendering mod. Foxy makes it run on NeoForge without modifying
 Voxy itself: it reads the unmodified Voxy jar at runtime and bridges the Fabric APIs
