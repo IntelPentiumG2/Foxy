@@ -8,7 +8,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import me.cortex.voxy.client.VoxyClientInstance;
-import me.cortex.voxy.client.core.IGetVoxyRenderSystem;
+import me.cortex.voxy.client.core.IVoxyRenderSystemHolder;
 import me.cortex.voxy.common.DebugUtils;
 import me.cortex.voxy.commonImpl.VoxyCommon;
 import me.cortex.voxy.commonImpl.WorldIdentifier;
@@ -89,14 +89,14 @@ public final class FoxyCommands {
         }
         var wr = Minecraft.getInstance().levelRenderer;
         if (wr != null) {
-            ((IGetVoxyRenderSystem) wr).voxy$shutdownRenderer();
+            ((IVoxyRenderSystemHolder) wr).voxy$shutdownRenderer();
         }
 
         VoxyCommon.shutdownInstance();
         System.gc();
         VoxyCommon.createInstance();
 
-        var r = Minecraft.getInstance().levelRenderer;
+        var r = Minecraft.getInstance().levelExtractor;
         if (r != null) r.allChanged();
         return 0;
     }
