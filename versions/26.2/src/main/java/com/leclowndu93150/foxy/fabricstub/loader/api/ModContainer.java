@@ -1,6 +1,6 @@
-package net.fabricmc.loader.api;
+package com.leclowndu93150.foxy.fabricstub.loader.api;
 
-import net.fabricmc.loader.api.metadata.ModMetadata;
+import com.leclowndu93150.foxy.fabricstub.loader.api.metadata.ModMetadata;
 
 import java.nio.file.Path;
 import java.util.List;

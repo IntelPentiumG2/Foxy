@@ -1,7 +1,7 @@
-package net.fabricmc.loader.api;
+package com.leclowndu93150.foxy.fabricstub.loader.api;
 
 import com.leclowndu93150.foxy.loader.FoxyFabricLoaderImpl;
-import net.fabricmc.api.EnvType;
+import com.leclowndu93150.foxy.fabricstub.api.EnvType;
 
 import java.nio.file.Path;
 import java.util.List;

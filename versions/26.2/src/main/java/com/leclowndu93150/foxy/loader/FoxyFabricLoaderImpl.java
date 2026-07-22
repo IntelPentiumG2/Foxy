@@ -1,11 +1,11 @@
 package com.leclowndu93150.foxy.loader;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.loader.api.FabricLoader;
-import net.fabricmc.loader.api.ModContainer;
-import net.fabricmc.loader.api.Version;
-import net.fabricmc.loader.api.metadata.CustomValue;
-import net.fabricmc.loader.api.metadata.ModMetadata;
+import com.leclowndu93150.foxy.fabricstub.api.EnvType;
+import com.leclowndu93150.foxy.fabricstub.loader.api.FabricLoader;
+import com.leclowndu93150.foxy.fabricstub.loader.api.ModContainer;
+import com.leclowndu93150.foxy.fabricstub.loader.api.Version;
+import com.leclowndu93150.foxy.fabricstub.loader.api.metadata.CustomValue;
+import com.leclowndu93150.foxy.fabricstub.loader.api.metadata.ModMetadata;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.fml.loading.FMLPaths;
