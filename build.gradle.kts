@@ -55,6 +55,20 @@ subprojects {
                 }
             }
 
+            // The bytecode-verification test loads the patched MixinDefaultChunkRenderer in a
+            // real classloader, which must be able to resolve its Sodium superclass; the sodium
+            // jar is compile-only for main code, so the test gets its file path the same way it
+            // gets Voxy 0.2.18's. getByName runs inside doFirst, at task execution, by which
+            // point the sodiumFabricCompileOnly configuration (created just below) exists.
+            tasks.withType<Test>().configureEach {
+                doFirst {
+                    systemProperty(
+                        "foxy.sodiumFabricJar",
+                        configurations.getByName("sodiumFabricCompileOnly").singleFile.absolutePath
+                    )
+                }
+            }
+
             // Sodium's NeoForge jar only carries its early-loading-window bootstrap classes
             // (compatibility checks, the desktop launch-warning splash) directly; the actual
             // client renderer classes (ShaderChunkRenderer, DefaultChunkRenderer, etc.) are
