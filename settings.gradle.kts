@@ -20,4 +20,7 @@ prism {
     version("26.2") {
         neoforge()
     }
+    version("26.1") {
+        neoforge()
+    }
 }

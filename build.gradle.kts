@@ -50,4 +50,21 @@ prism {
         }
     }
 
+    version("26.1") {
+        neoforge {
+            loaderVersion = "26.1.2.84"
+            loaderVersionRange = "[4,)"
+
+            dependencies {
+                compileOnly("maven.modrinth:sodium:mc26.1.2-0.9.1-neoforge")
+                runtimeOnly("maven.modrinth:sodium:mc26.1.2-0.9.1-neoforge")
+                compileOnly("maven.modrinth:voxy:0.2.16-beta")
+                implementation("maven.modrinth:voxy:0.2.16-beta")
+                compileOnly("cpw.mods:modlauncher:11.0.5")
+                compileOnly("cpw.mods:securejarhandler:3.0.8")
+                compileOnly("net.neoforged.fancymodloader:loader:11.0.15")
+            }
+        }
+    }
+
 }
