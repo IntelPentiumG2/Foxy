@@ -54,6 +54,29 @@ subprojects {
                     systemProperty("foxy.voxy0218Jar", voxy0218Fixture.singleFile.absolutePath)
                 }
             }
+
+            // Sodium's NeoForge jar only carries its early-loading-window bootstrap classes
+            // (compatibility checks, the desktop launch-warning splash) directly; the actual
+            // client renderer classes (ShaderChunkRenderer, DefaultChunkRenderer, etc.) are
+            // jar-in-jar'd under META-INF/jarjar and only get unpacked onto a classpath by
+            // NeoForge's own runtime JarJar dependency locator — javac never sees them, so
+            // mixins referencing those types by name fail to compile. The Fabric jar ships the
+            // exact same client classes unnested (same FQNs, same descriptors, same class file
+            // bytes — Sodium's client code isn't loader-specific). Declaring it a second
+            // `compileOnly("maven.modrinth:sodium:...")` doesn't work: Modrinth's virtual Maven
+            // coordinates both loader jars as the same group:artifact ("maven.modrinth:sodium")
+            // with only the version string differing ("mc26.1.2-0.9.1-neoforge" vs
+            // "...-fabric"), so Gradle's ordinary conflict resolution silently collapses the two
+            // to one. A separate, non-transitive configuration sidesteps that resolution
+            // entirely; its jar is added straight to the main source set's compile classpath and
+            // never touches `runtimeOnly` or the shipped jar.
+            val sodiumFabricCompileOnly = configurations.create("sodiumFabricCompileOnly") {
+                isCanBeConsumed = false
+                isCanBeResolved = true
+                isTransitive = false
+            }
+            dependencies.add(sodiumFabricCompileOnly.name, "maven.modrinth:sodium:mc26.1.2-0.9.1-fabric")
+            the<SourceSetContainer>()["main"].compileClasspath += sodiumFabricCompileOnly
         }
     }
 
