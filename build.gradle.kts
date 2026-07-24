@@ -12,10 +12,32 @@ version = "1.0.0"
 subprojects {
     afterEvaluate {
         the<SourceSetContainer>()["main"].java.srcDir(rootProject.file("common/src/main/java"))
+
+        // dev.prism's `dependencies { }` DSL has no testImplementation/testRuntimeOnly accessors
+        // (only api/implementation/compileOnly/runtimeOnly and their mod variants), so the test
+        // dependencies for VoxySodiumCompatPatchTest are declared here with plain Gradle instead.
+        // Deferred to afterEvaluate for the same reason as the srcDir call above: the java
+        // plugin that creates the testImplementation/testRuntimeOnly configurations is applied
+        // by dev.prism itself, so those configurations do not exist yet at script-evaluation time.
+        //
+        // ASM 9.8, not 9.7.1: Voxy 0.2.16's classes are compiled to class file major version 69
+        // (Java 25). ASM 9.7.1 tops out at major version 68 (Java 24) and throws
+        // "Unsupported class file major version 69" reading them; 9.8 is the first release
+        // that added V25 support.
+        dependencies {
+            "testImplementation"("org.junit.jupiter:junit-jupiter:5.11.3")
+            "testRuntimeOnly"("org.junit.platform:junit-platform-launcher")
+            "testImplementation"("org.ow2.asm:asm:9.8")
+            "testImplementation"("org.ow2.asm:asm-tree:9.8")
+        }
     }
 
     tasks.withType<Jar>().configureEach {
         exclude("net/fabricmc/**")
+    }
+
+    tasks.withType<Test>().configureEach {
+        useJUnitPlatform()
     }
 }
 

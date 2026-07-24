@@ -166,6 +166,9 @@ public class FoxyFabricModReader implements IModFileReader {
      * {@code net.fabricmc.loader.api.FabricLoader} found Foxy's copy, concluded it was on Fabric,
      * and then failed on a stub Foxy does not ship. Keeping the name out of the game entirely is
      * what makes those probes go back to answering "no".
+     *
+     * <p>The Sodium compatibility patch runs in the same pass; it is a no-op on any Voxy build
+     * that does not carry Voxy 0.2.16's Sodium 0.8 descriptors.
      */
     private static byte[] remapFabricRefs(byte[] clazz) {
         ClassReader reader = new ClassReader(clazz);
@@ -178,7 +181,7 @@ public class FoxyFabricModReader implements IModFileReader {
                         : internalName;
             }
         }), 0);
-        return writer.toByteArray();
+        return VoxySodiumCompatPatch.patch(writer.toByteArray());
     }
 
     /**
