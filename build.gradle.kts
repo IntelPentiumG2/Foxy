@@ -10,6 +10,10 @@ version = "1.0.0"
 // net.fabricmc.loader.api.FabricLoader in the game, which every multiloader mod that probes for
 // that class read as "we are on Fabric" before failing on a stub Foxy does not implement.
 subprojects {
+    afterEvaluate {
+        the<SourceSetContainer>()["main"].java.srcDir(rootProject.file("common/src/main/java"))
+    }
+
     tasks.withType<Jar>().configureEach {
         exclude("net/fabricmc/**")
     }
