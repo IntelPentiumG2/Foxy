@@ -1,0 +1,93 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "request": "launch",
+      "name": "NeoForge Client (26.2)",
+      "presentation": {
+        "group": "Mod Development - 26.2",
+        "order": 0
+      },
+      "projectName": "26.2",
+      "mainClass": "net.neoforged.devlaunch.Main",
+      "args": [
+        "@/home/jonas/IntelliJ/Foxy/versions/26.2/build/moddev/clientRunProgramArgs.txt"
+      ],
+      "vmArgs": [
+        "@/home/jonas/IntelliJ/Foxy/versions/26.2/build/moddev/clientRunVmArgs.txt",
+        "-Dfml.modFolders\u003dfoxy%%/home/jonas/IntelliJ/Foxy/versions/26.2/bin/main"
+      ],
+      "cwd": "${workspaceFolder}/versions/26.2/runs/client",
+      "env": {},
+      "console": "internalConsole",
+      "shortenCommandLine": "none"
+    },
+    {
+      "type": "java",
+      "request": "launch",
+      "name": "NeoForge ClientData (26.2)",
+      "presentation": {
+        "group": "Mod Development - 26.2",
+        "order": 1
+      },
+      "projectName": "26.2",
+      "mainClass": "net.neoforged.devlaunch.Main",
+      "args": [
+        "@/home/jonas/IntelliJ/Foxy/versions/26.2/build/moddev/clientDataRunProgramArgs.txt"
+      ],
+      "vmArgs": [
+        "@/home/jonas/IntelliJ/Foxy/versions/26.2/build/moddev/clientDataRunVmArgs.txt",
+        "-Dfml.modFolders\u003dfoxy%%/home/jonas/IntelliJ/Foxy/versions/26.2/bin/main"
+      ],
+      "cwd": "${workspaceFolder}/versions/26.2/runs/clientData",
+      "env": {},
+      "console": "internalConsole",
+      "shortenCommandLine": "none"
+    },
+    {
+      "type": "java",
+      "request": "launch",
+      "name": "NeoForge Server (26.2)",
+      "presentation": {
+        "group": "Mod Development - 26.2",
+        "order": 2
+      },
+      "projectName": "26.2",
+      "mainClass": "net.neoforged.devlaunch.Main",
+      "args": [
+        "@/home/jonas/IntelliJ/Foxy/versions/26.2/build/moddev/serverRunProgramArgs.txt"
+      ],
+      "vmArgs": [
+        "@/home/jonas/IntelliJ/Foxy/versions/26.2/build/moddev/serverRunVmArgs.txt",
+        "-Dfml.modFolders\u003dfoxy%%/home/jonas/IntelliJ/Foxy/versions/26.2/bin/main"
+      ],
+      "cwd": "${workspaceFolder}/versions/26.2/runs/server",
+      "env": {},
+      "console": "internalConsole",
+      "shortenCommandLine": "none"
+    },
+    {
+      "type": "java",
+      "request": "launch",
+      "name": "NeoForge ServerData (26.2)",
+      "presentation": {
+        "group": "Mod Development - 26.2",
+        "order": 3
+      },
+      "projectName": "26.2",
+      "mainClass": "net.neoforged.devlaunch.Main",
+      "args": [
+        "@/home/jonas/IntelliJ/Foxy/versions/26.2/build/moddev/serverDataRunProgramArgs.txt"
+      ],
+      "vmArgs": [
+        "@/home/jonas/IntelliJ/Foxy/versions/26.2/build/moddev/serverDataRunVmArgs.txt",
+        "-Dfml.modFolders\u003dfoxy%%/home/jonas/IntelliJ/Foxy/versions/26.2/bin/main"
+      ],
+      "cwd": "${workspaceFolder}/versions/26.2/runs/serverData",
+      "env": {},
+      "console": "internalConsole",
+      "shortenCommandLine": "none"
+    }
+  ]
+}
