@@ -100,23 +100,37 @@ final class FoxyMixinFilter {
     private static Set<String> installedClasses;
 
     /**
-     * Every class in every jar sitting alongside this one. Built once; the alternative is asking
-     * the class loader, which at discovery time cannot see other mods yet.
+     * Every class in every jar sitting alongside this one, plus every jar on the JVM classpath.
+     * Built once; the alternative is asking the class loader, which at discovery time cannot see
+     * other mods yet.
+     *
+     * <p>The sibling scan covers a launcher instance, where every mod shares one {@code mods}
+     * directory. The classpath scan covers the dev client, where the Voxy jar sits alone in its
+     * Gradle-cache directory and its siblings are nothing — there, the other mods arrive on
+     * {@code java.class.path} instead. Without it, every one of Voxy's Sodium mixins is dropped
+     * in dev runs, and Voxy crashes the moment it touches one of its own accessor interfaces.
+     * In a launcher instance the classpath holds only the loader's bootstrap jars, so the extra
+     * scan stays cheap where it is not needed.
      */
     private static synchronized Set<String> installedClasses(Path jarPath) {
         if (installedClasses != null) {
             return installedClasses;
         }
         Set<String> classes = new HashSet<>();
-        Path dir = jarPath.getParent();
-        if (dir == null) {
-            return installedClasses = classes;
-        }
         List<Path> jars = new ArrayList<>();
-        try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir, "*.jar")) {
-            stream.forEach(jars::add);
-        } catch (IOException e) {
-            LOGGER.debug("Could not list {}", dir, e);
+        Path dir = jarPath.getParent();
+        if (dir != null) {
+            try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir, "*.jar")) {
+                stream.forEach(jars::add);
+            } catch (IOException e) {
+                LOGGER.debug("Could not list {}", dir, e);
+            }
+        }
+        for (String entry : System.getProperty("java.class.path", "")
+                .split(java.io.File.pathSeparator)) {
+            if (entry.endsWith(".jar")) {
+                jars.add(Path.of(entry));
+            }
         }
         for (Path path : jars) {
             try (ZipFile zip = new ZipFile(path.toFile())) {
