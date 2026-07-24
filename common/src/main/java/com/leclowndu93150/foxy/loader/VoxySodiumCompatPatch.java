@@ -23,9 +23,13 @@ import org.objectweb.asm.Opcodes;
  *       bitmask, takes over. See {@code FoxyMixinRenderSectionManager}.
  * </ul>
  *
- * <p>Every rewrite is keyed to a descriptor that only Voxy 0.2.16 contains. A jar without them —
- * 0.2.18 on 26.2, or any future build — comes back byte-identical, so this stays inert rather
- * than corrupting a Voxy that no longer needs it.
+ * <p>Every rewrite is keyed to a descriptor that only Voxy 0.2.16 contains — including the strip,
+ * which is gated on {@code voxy$updateOnUpload}'s own {@code (...)Z} return, not merely its name.
+ * Voxy 0.2.18 keeps that method name but its handler already returns {@code (...)I} and its
+ * {@code @Redirect} already targets Sodium 0.9's {@code setInfo}, so stripping it there would
+ * silently delete a working hook. A jar without the 0.8 signatures — 0.2.18 on 26.2, or any
+ * future build — comes back byte-identical, so this stays inert rather than corrupting a Voxy
+ * that no longer needs it.
  */
 public final class VoxySodiumCompatPatch {
 
@@ -85,7 +89,12 @@ public final class VoxySodiumCompatPatch {
         public MethodVisitor visitMethod(int access, String name, String descriptor,
                                          String signature, String[] exceptions) {
             MethodVisitor delegate = super.visitMethod(access, name, descriptor, signature, exceptions);
-            boolean dropRedirect = dropUpdateOnUploadRedirect && UPDATE_ON_UPLOAD.equals(name);
+            // Gated on the 0.8 (...)Z return, not just the name: Voxy 0.2.18 keeps
+            // voxy$updateOnUpload but its handler already returns (...)I for Sodium 0.9, and its
+            // @Redirect is already correct. Stripping on name alone would delete that working hook.
+            boolean dropRedirect = dropUpdateOnUploadRedirect
+                    && UPDATE_ON_UPLOAD.equals(name)
+                    && descriptor.endsWith(")Z");
             return new MethodRewriter(delegate, widenUploadResults, dropRedirect);
         }
 

@@ -30,6 +30,31 @@ subprojects {
             "testImplementation"("org.ow2.asm:asm:9.8")
             "testImplementation"("org.ow2.asm:asm-tree:9.8")
         }
+
+        // VoxySodiumCompatPatchTest needs to read a class out of the real Voxy 0.2.18 jar to
+        // prove the inertness guarantee (0.2.18's classes must come back byte-identical). It
+        // deliberately does NOT go on testImplementation: 0.2.16 (already on that classpath) and
+        // 0.2.18 both contain a class named
+        // me/cortex/voxy/client/mixin/sodium/MixinRenderSectionManager, so having both jars on
+        // one classpath would make classloader resource lookups non-deterministic about which
+        // jar's copy answers a given getResourceAsStream call, silently invalidating the 0.2.16
+        // assertions. Resolving 0.2.18 as its own file, off this separate non-consumable
+        // configuration, keeps it out of any classloader entirely; the test opens it directly
+        // with ZipFile instead.
+        if (name == "26.1") {
+            val voxy0218Fixture = configurations.create("voxy0218Fixture") {
+                isCanBeConsumed = false
+                isCanBeResolved = true
+                isTransitive = false
+            }
+            dependencies.add(voxy0218Fixture.name, "maven.modrinth:voxy:0.2.18-beta")
+
+            tasks.withType<Test>().configureEach {
+                doFirst {
+                    systemProperty("foxy.voxy0218Jar", voxy0218Fixture.singleFile.absolutePath)
+                }
+            }
+        }
     }
 
     tasks.withType<Jar>().configureEach {

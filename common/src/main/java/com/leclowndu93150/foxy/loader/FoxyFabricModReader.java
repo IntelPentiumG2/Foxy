@@ -168,7 +168,9 @@ public class FoxyFabricModReader implements IModFileReader {
      * what makes those probes go back to answering "no".
      *
      * <p>The Sodium compatibility patch runs in the same pass; it is a no-op on any Voxy build
-     * that does not carry Voxy 0.2.16's Sodium 0.8 descriptors.
+     * that does not carry Voxy 0.2.16's Sodium 0.8 method signatures — see {@link
+     * VoxySodiumCompatPatch} for how each rewrite is gated on those signatures specifically, not
+     * merely on class or method name.
      */
     private static byte[] remapFabricRefs(byte[] clazz) {
         ClassReader reader = new ClassReader(clazz);
