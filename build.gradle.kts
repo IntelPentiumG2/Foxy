@@ -12,94 +12,10 @@ version = "1.0.0"
 subprojects {
     afterEvaluate {
         the<SourceSetContainer>()["main"].java.srcDir(rootProject.file("common/src/main/java"))
-
-        // dev.prism's `dependencies { }` DSL has no testImplementation/testRuntimeOnly accessors
-        // (only api/implementation/compileOnly/runtimeOnly and their mod variants), so the test
-        // dependencies for VoxySodiumCompatPatchTest are declared here with plain Gradle instead.
-        // Deferred to afterEvaluate for the same reason as the srcDir call above: the java
-        // plugin that creates the testImplementation/testRuntimeOnly configurations is applied
-        // by dev.prism itself, so those configurations do not exist yet at script-evaluation time.
-        //
-        // ASM 9.8, not 9.7.1: Voxy 0.2.16's classes are compiled to class file major version 69
-        // (Java 25). ASM 9.7.1 tops out at major version 68 (Java 24) and throws
-        // "Unsupported class file major version 69" reading them; 9.8 is the first release
-        // that added V25 support.
-        dependencies {
-            "testImplementation"("org.junit.jupiter:junit-jupiter:5.11.3")
-            "testRuntimeOnly"("org.junit.platform:junit-platform-launcher")
-            "testImplementation"("org.ow2.asm:asm:9.8")
-            "testImplementation"("org.ow2.asm:asm-tree:9.8")
-        }
-
-        // VoxySodiumCompatPatchTest needs to read a class out of the real Voxy 0.2.18 jar to
-        // prove the inertness guarantee (0.2.18's classes must come back byte-identical). It
-        // deliberately does NOT go on testImplementation: 0.2.16 (already on that classpath) and
-        // 0.2.18 both contain a class named
-        // me/cortex/voxy/client/mixin/sodium/MixinRenderSectionManager, so having both jars on
-        // one classpath would make classloader resource lookups non-deterministic about which
-        // jar's copy answers a given getResourceAsStream call, silently invalidating the 0.2.16
-        // assertions. Resolving 0.2.18 as its own file, off this separate non-consumable
-        // configuration, keeps it out of any classloader entirely; the test opens it directly
-        // with ZipFile instead.
-        if (name == "26.1") {
-            val voxy0218Fixture = configurations.create("voxy0218Fixture") {
-                isCanBeConsumed = false
-                isCanBeResolved = true
-                isTransitive = false
-            }
-            dependencies.add(voxy0218Fixture.name, "maven.modrinth:voxy:0.2.18-beta")
-
-            tasks.withType<Test>().configureEach {
-                doFirst {
-                    systemProperty("foxy.voxy0218Jar", voxy0218Fixture.singleFile.absolutePath)
-                }
-            }
-
-            // The bytecode-verification test loads the patched MixinDefaultChunkRenderer in a
-            // real classloader, which must be able to resolve its Sodium superclass; the sodium
-            // jar is compile-only for main code, so the test gets its file path the same way it
-            // gets Voxy 0.2.18's. getByName runs inside doFirst, at task execution, by which
-            // point the sodiumFabricCompileOnly configuration (created just below) exists.
-            tasks.withType<Test>().configureEach {
-                doFirst {
-                    systemProperty(
-                        "foxy.sodiumFabricJar",
-                        configurations.getByName("sodiumFabricCompileOnly").singleFile.absolutePath
-                    )
-                }
-            }
-
-            // Sodium's NeoForge jar only carries its early-loading-window bootstrap classes
-            // (compatibility checks, the desktop launch-warning splash) directly; the actual
-            // client renderer classes (ShaderChunkRenderer, DefaultChunkRenderer, etc.) are
-            // jar-in-jar'd under META-INF/jarjar and only get unpacked onto a classpath by
-            // NeoForge's own runtime JarJar dependency locator — javac never sees them, so
-            // mixins referencing those types by name fail to compile. The Fabric jar ships the
-            // exact same client classes unnested (same FQNs, same descriptors, same class file
-            // bytes — Sodium's client code isn't loader-specific). Declaring it a second
-            // `compileOnly("maven.modrinth:sodium:...")` doesn't work: Modrinth's virtual Maven
-            // coordinates both loader jars as the same group:artifact ("maven.modrinth:sodium")
-            // with only the version string differing ("mc26.1.2-0.9.1-neoforge" vs
-            // "...-fabric"), so Gradle's ordinary conflict resolution silently collapses the two
-            // to one. A separate, non-transitive configuration sidesteps that resolution
-            // entirely; its jar is added straight to the main source set's compile classpath and
-            // never touches `runtimeOnly` or the shipped jar.
-            val sodiumFabricCompileOnly = configurations.create("sodiumFabricCompileOnly") {
-                isCanBeConsumed = false
-                isCanBeResolved = true
-                isTransitive = false
-            }
-            dependencies.add(sodiumFabricCompileOnly.name, "maven.modrinth:sodium:mc26.1.2-0.9.1-fabric")
-            the<SourceSetContainer>()["main"].compileClasspath += sodiumFabricCompileOnly
-        }
     }
 
     tasks.withType<Jar>().configureEach {
         exclude("net/fabricmc/**")
-    }
-
-    tasks.withType<Test>().configureEach {
-        useJUnitPlatform()
     }
 }
 
@@ -123,8 +39,12 @@ prism {
             dependencies {
                 compileOnly("maven.modrinth:sodium:mc26.2-0.9.1-neoforge")
                 runtimeOnly("maven.modrinth:sodium:mc26.2-0.9.1-neoforge")
-                compileOnly("maven.modrinth:voxy:0.2.18-beta")
-                implementation("maven.modrinth:voxy:0.2.18-beta")
+                // Version ID, not "0.2.18-beta": Voxy publishes that same version_number twice,
+                // once per Minecraft version, and the plain name resolves to whichever Modrinth
+                // happens to list first (today, this one). zZX86mbc is the 26.2 jar; Zt3LPI0b,
+                // used by the 26.1 module below, is the 26.1.2 one.
+                compileOnly("maven.modrinth:voxy:zZX86mbc")
+                implementation("maven.modrinth:voxy:zZX86mbc")
                 compileOnly("cpw.mods:modlauncher:11.0.5")
                 compileOnly("cpw.mods:securejarhandler:3.0.8")
                 compileOnly("net.neoforged.fancymodloader:loader:11.0.13")
@@ -142,8 +62,10 @@ prism {
             dependencies {
                 compileOnly("maven.modrinth:sodium:mc26.1.2-0.9.1-neoforge")
                 runtimeOnly("maven.modrinth:sodium:mc26.1.2-0.9.1-neoforge")
-                compileOnly("maven.modrinth:voxy:0.2.16-beta")
-                implementation("maven.modrinth:voxy:0.2.16-beta")
+                // Zt3LPI0b is Voxy 0.2.18-beta's 26.1.2 jar. See the note in the 26.2 block:
+                // the bare version_number would resolve to the 26.2 build instead.
+                compileOnly("maven.modrinth:voxy:Zt3LPI0b")
+                implementation("maven.modrinth:voxy:Zt3LPI0b")
                 compileOnly("cpw.mods:modlauncher:11.0.5")
                 compileOnly("cpw.mods:securejarhandler:3.0.8")
                 compileOnly("net.neoforged.fancymodloader:loader:11.0.15")

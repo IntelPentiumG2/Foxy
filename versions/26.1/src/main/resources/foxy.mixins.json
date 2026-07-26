@@ -3,9 +3,7 @@
   "minVersion": "0.8",
   "package": "com.leclowndu93150.foxy.mixin",
   "compatibilityLevel": "JAVA_${java_version}",
-  "mixins": [
-    "sodium.FoxyMixinRenderSectionManager"
-  ],
+  "mixins": [],
   "client": [],
   "server": [],
   "injectors": {
