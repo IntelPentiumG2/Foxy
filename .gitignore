@@ -11,3 +11,5 @@ runs/
 run/
 **/run/
 .DS_Store
+docs/
+.superpowers/
