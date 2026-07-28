@@ -46,6 +46,11 @@ it uses over to NeoForge equivalents.
   draws its shell into its neighbours and would otherwise bake to nothing the bakery can see.
   Vanilla models are untouched — NeoForge's context-carrying overload forwards to the context-free
   one unless a model overrides it, and geometry already inside the block is left as it was built.
+- Turns a mod's Mod Menu entrypoint into NeoForge's `IConfigScreenFactory`, so its settings get
+  the Config button in the mod list. Mod Menu is Fabric-only, and its two interfaces are stubbed
+  next to the Fabric ones. Voxy and `voxy-extra` reach the same screen through Sodium's video
+  settings, which the `sodium:config_api_user` entrypoint already covers; Voxy World Gen declares
+  only the Mod Menu one and had no way in at all.
 - Reimplements the `/voxy` command against NeoForge's command system.
 - Adds a Chunky auto-ingest mixin targeting NeoForge's `NeoForgeWorld`. Chunky has no
   NeoForge build for 26.2 yet, so this mixin stays dormant until one ships.

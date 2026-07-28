@@ -1,5 +1,6 @@
 package com.leclowndu93150.foxy;
 
+import com.leclowndu93150.foxy.loader.FoxyConfigScreens;
 import com.leclowndu93150.foxy.loader.FoxyEntrypoints;
 import com.leclowndu93150.foxy.loader.FoxyFabricApi;
 import me.cortex.voxy.client.DebugEntries;
@@ -35,6 +36,7 @@ public class FoxyNeoForge {
 
     private void onClientSetup(FMLClientSetupEvent event) {
         DebugEntries.init();
+        FoxyConfigScreens.registerAll();
     }
 
     private void onRegisterClientCommands(RegisterClientCommandsEvent event) {

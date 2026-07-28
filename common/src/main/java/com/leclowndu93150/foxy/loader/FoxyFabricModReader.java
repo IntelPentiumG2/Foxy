@@ -62,8 +62,17 @@ public class FoxyFabricModReader implements IModFileReader {
      */
     static final String ENTRYPOINTS_PROPERTY = "foxy:entrypoints";
 
+    /** Mod property carrying the Mod Menu entrypoint classes, read back the same way. */
+    static final String MODMENU_PROPERTY = "foxy:modmenu";
+
+    private static final String MODMENU_ENTRYPOINT = "modmenu";
+
     private static final String FABRIC_PREFIX = "net/fabricmc/";
     private static final String STUB_PREFIX = "com/leclowndu93150/foxy/fabricstub/";
+
+    /** Mod Menu is Fabric-only, and its interfaces are stubbed alongside the Fabric ones. */
+    private static final String MODMENU_PREFIX = "com/terraformersmc/";
+    private static final String MODMENU_STUB_PREFIX = STUB_PREFIX + "terraformers/";
 
     /**
      * Jars this reader converted from Fabric metadata. Only these carry Fabric-style nested
@@ -173,9 +182,13 @@ public class FoxyFabricModReader implements IModFileReader {
         reader.accept(new ClassRemapper(writer, new Remapper() {
             @Override
             public String map(String internalName) {
-                return internalName.startsWith(FABRIC_PREFIX)
-                        ? STUB_PREFIX + internalName.substring(FABRIC_PREFIX.length())
-                        : internalName;
+                if (internalName.startsWith(FABRIC_PREFIX)) {
+                    return STUB_PREFIX + internalName.substring(FABRIC_PREFIX.length());
+                }
+                if (internalName.startsWith(MODMENU_PREFIX)) {
+                    return MODMENU_STUB_PREFIX + internalName.substring(MODMENU_PREFIX.length());
+                }
+                return internalName;
             }
         }), 0);
         return writer.toByteArray();
@@ -241,6 +254,14 @@ public class FoxyFabricModReader implements IModFileReader {
         if (!entrypoints.isEmpty()) {
             sb.append('"').append(ENTRYPOINTS_PROPERTY).append("\" = \"")
                     .append(esc(String.join(",", entrypoints))).append("\"\n");
+        }
+        // A mod's settings screen hangs off its Mod Menu entrypoint on Fabric. NeoForge asks for
+        // an extension point on the mod container instead, which FoxyConfigScreens registers from
+        // this, so the mod list gets the button it would have had.
+        List<String> modMenu = readEntrypoints(fmj, MODMENU_ENTRYPOINT);
+        if (!modMenu.isEmpty()) {
+            sb.append('"').append(MODMENU_PROPERTY).append("\" = \"")
+                    .append(esc(String.join(",", modMenu))).append("\"\n");
         }
         // Sodium's NeoForge build looks for its config API users in mod properties, where its
         // Fabric build reads an entrypoint, so this one carries over rather than being lost.
