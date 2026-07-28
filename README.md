@@ -35,6 +35,17 @@ it uses over to NeoForge equivalents.
   integrations, but a `@Mixin` on a missing class fails the entire config, and these configs
   are `required` — so an integration with a mod that has no NeoForge build would otherwise
   take the whole mod down.
+- Hands Voxy's LoD texture bakery the block state it is baking, and keeps the result inside the
+  block. Voxy collects a model's parts through vanilla's context-free `collectParts`, and NeoForge
+  models that build their geometry from the world — Dynamic Trees' branches read the trunk radius
+  out of the state — are handed air by that overload and emit nothing, so the block bakes fully
+  transparent and its LoD is a hole. The stub level Foxy passes instead reports air around the
+  block, which is what makes a model close its geometry rather than leave the open ends it would
+  normally hand to its neighbours. Quads that land wholly outside the block are clamped onto the
+  face they were drawn beyond: a model wider than one block, like a Dynamic Trees thick trunk,
+  draws its shell into its neighbours and would otherwise bake to nothing the bakery can see.
+  Vanilla models are untouched — NeoForge's context-carrying overload forwards to the context-free
+  one unless a model overrides it, and geometry already inside the block is left as it was built.
 - Reimplements the `/voxy` command against NeoForge's command system.
 - Adds a Chunky auto-ingest mixin targeting NeoForge's `NeoForgeWorld`. Chunky has no
   NeoForge build for 26.2 yet, so this mixin stays dormant until one ships.

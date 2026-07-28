@@ -1,1 +1,3 @@
 com.leclowndu93150.foxy.loader.FoxyAccessWidener
+com.leclowndu93150.foxy.loader.FoxyDynamicModelPatch
+com.leclowndu93150.foxy.loader.FoxyIngestPatch
