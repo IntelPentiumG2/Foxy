@@ -69,6 +69,8 @@ prism {
                 compileOnly("cpw.mods:modlauncher:11.0.5")
                 compileOnly("cpw.mods:securejarhandler:3.0.8")
                 compileOnly("net.neoforged.fancymodloader:loader:11.0.15")
+
+                compileOnly("maven.modrinth:chunky:hEXc6nbN")
             }
         }
     }
