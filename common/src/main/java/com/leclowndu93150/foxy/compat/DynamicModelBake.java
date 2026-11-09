@@ -56,11 +56,41 @@ public final class DynamicModelBake {
     private static final String RADIUS = "radius";
     private static final int THICK_RADIUS = 5;
 
+    /**
+     * The state the bakery is working on, published by {@link #beginBake} for the length of one
+     * {@code bakeBlockModel} call. The redirected {@code collectParts} may sit in a method that no
+     * longer has the state as an argument — a mixin that wraps the call moves it into one of its
+     * own — so it is looked up here rather than passed along.
+     */
+    private static final ThreadLocal<BlockState> BAKING = new ThreadLocal<>();
+
     private DynamicModelBake() {}
 
-    @SuppressWarnings("deprecation") // The fallback is the call this patch exists to replace.
+    /** Called at the head of Voxy's {@code bakeBlockModel}; see {@code FoxyDynamicModelPatch}. */
+    public static void beginBake(BlockState state) {
+        BAKING.set(state);
+    }
+
+    /** Called before each return of {@code bakeBlockModel}. */
+    public static void endBake() {
+        BAKING.remove();
+    }
+
+    /** The replacement for every no-context {@code collectParts} call in Voxy's bakery. */
+    @SuppressWarnings("deprecation") // Outside a bake there is no state to offer, so the original call stands.
     public static void collectParts(BlockStateModel model, RandomSource random,
-                                    List<BlockStateModelPart> parts, BlockState state) {
+                                    List<BlockStateModelPart> parts) {
+        BlockState state = BAKING.get();
+        if (state == null) {
+            model.collectParts(random, parts);
+            return;
+        }
+        collectParts(model, random, parts, state);
+    }
+
+    @SuppressWarnings("deprecation") // The fallback is the call this patch exists to replace.
+    private static void collectParts(BlockStateModel model, RandomSource random,
+                                     List<BlockStateModelPart> parts, BlockState state) {
         try {
             model.collectParts(new LoneBlock(state), BlockPos.ZERO, state, random, parts);
             addConnections(model, random, parts, state);
@@ -252,36 +282,25 @@ public final class DynamicModelBake {
     };
 
     /**
-     * A level holding the block being baked and nothing else: air in every other direction.
+     * The block ringed by itself, with air above and below, for the limbs wide enough that their
+     * reach is worth drawing.
      *
-     * <p>Voxy keeps one baked texture per block state and connection state is not part of the
-     * state, so no answer here is right for every copy of the block in the world. Air is the answer
-     * that keeps a model's geometry <em>closed</em>. Reporting the block as its own neighbour
-     * instead sounds better — a fully connected shape fills more of the voxel — but connection
-     * geometry is open-ended by construction: Dynamic Trees' sleeves drop the face towards the core
-     * and cap the far end only at radius 1, because in the world the neighbouring block covers
-     * both. Voxy has no neighbour to bake, and rasterises that from six orthographic views into
-     * outlines. Air keeps the core, which is a closed cube of the branch's radius.
+     * <p>Sideways the block answers with itself, so a model too wide for its own block closes the
+     * seams it would otherwise leave to its neighbours: a Dynamic Trees trunk of more than a
+     * block's width draws its outer shell into the blocks around it, and only a neighbour it
+     * recognises makes it drop the faces that meet them. Above and below it answers air, because a
+     * model that believes the trunk carries on drops its end caps too, and those caps are the only
+     * geometry the bakery's views from above and below have to rasterise.
      */
-    /**
-     * The same block above and below, air to the sides, which draws the joins that stack.
-     *
-     * <p>Offering the block every neighbour draws every join it has, and a Dynamic Trees branch
-     * answers with all six sleeves at once — a cross, which is what a branch looks like nowhere.
-     * The join worth having is the vertical one: a trunk is a column, and a column that does not
-     * reach the top of its block leaves a gap in every trunk in view. Sideways runs of branch fall
-     * back to their own cubes, which reads as beading rather than as a field of crosses.
-     */
-    /** The same block in every direction, for the limbs whose reach is worth drawing. */
     private record SolidNeighbours(BlockState state) implements BlockAndTintGetter {
         @Override
         public BlockState getBlockState(BlockPos pos) {
-            return state;
+            return pos.getY() == 0 ? state : Blocks.AIR.defaultBlockState();
         }
 
         @Override
         public FluidState getFluidState(BlockPos pos) {
-            return state.getFluidState();
+            return getBlockState(pos).getFluidState();
         }
 
         @Override
@@ -321,6 +340,15 @@ public final class DynamicModelBake {
         }
     }
 
+    /**
+     * The same block above and below, air to the sides, which draws the joins that stack.
+     *
+     * <p>Offering the block every neighbour draws every join it has, and a Dynamic Trees branch
+     * answers with all six sleeves at once — a cross, which is what a branch looks like nowhere.
+     * The join worth having is the vertical one: a trunk is a column, and a column that does not
+     * reach the top of its block leaves a gap in every trunk in view. Sideways runs of branch fall
+     * back to their own cubes, which reads as beading rather than as a field of crosses.
+     */
     private record Column(BlockState state) implements BlockAndTintGetter {
         @Override
         public BlockState getBlockState(BlockPos pos) {
@@ -369,6 +397,18 @@ public final class DynamicModelBake {
         }
     }
 
+    /**
+     * A level holding the block being baked and nothing else: air in every other direction.
+     *
+     * <p>Voxy keeps one baked texture per block state and connection state is not part of the
+     * state, so no answer here is right for every copy of the block in the world. Air is the answer
+     * that keeps a model's geometry <em>closed</em>. Reporting the block as its own neighbour
+     * instead sounds better — a fully connected shape fills more of the voxel — but connection
+     * geometry is open-ended by construction: Dynamic Trees' sleeves drop the face towards the core
+     * and cap the far end only at radius 1, because in the world the neighbouring block covers
+     * both. Voxy has no neighbour to bake, and rasterises that from six orthographic views into
+     * outlines. Air keeps the core, which is a closed cube of the branch's radius.
+     */
     private record LoneBlock(BlockState state) implements BlockAndTintGetter {
         @Override
         public BlockState getBlockState(BlockPos pos) {

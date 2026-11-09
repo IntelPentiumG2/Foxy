@@ -41,7 +41,7 @@ public class FoxyFabricModReader implements IModFileReader {
      * mods hijacks them from the loader that was already handling them correctly, so the set is
      * an allowlist rather than "anything with a fabric.mod.json".
      */
-    private static final Set<String> SUPPORTED_MOD_IDS = Set.of("voxy", "voxy-extra", "voxyworldgenv2");
+    private static final Set<String> SUPPORTED_MOD_IDS = Set.of("voxy", "voxy-extra", "voxyworldgenv2", "voxyseedgen");
 
     /**
      * Fabric mod ids that have no NeoForge counterpart to depend on: the loader itself, and

@@ -5,9 +5,9 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 
 /**
- * Voxy builds its {@code /voxy} tree with these, but Foxy registers an equivalent tree against
- * NeoForge's command system instead (see {@code FoxyCommands}), so nothing here is ever invoked.
- * It exists so Voxy's command classes link.
+ * The builders Fabric mods make their client command trees with. The trees are registered on
+ * NeoForge's client dispatcher, whose source is made a {@link FabricClientCommandSource} by
+ * {@code MixinCommandSourceStack}.
  */
 public final class ClientCommands {
     private ClientCommands() {}

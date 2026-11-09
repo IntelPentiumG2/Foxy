@@ -4,5 +4,7 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.Component;
 
 public interface FabricClientCommandSource extends SharedSuggestionProvider {
+    void sendFeedback(Component message);
+
     void sendError(Component message);
 }

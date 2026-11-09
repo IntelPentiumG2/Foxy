@@ -46,12 +46,17 @@ it uses over to NeoForge equivalents.
   draws its shell into its neighbours and would otherwise bake to nothing the bakery can see.
   Vanilla models are untouched — NeoForge's context-carrying overload forwards to the context-free
   one unless a model overrides it, and geometry already inside the block is left as it was built.
+  The call is redirected wherever it ends up in the bakery, so a mod that wraps it with a mixin —
+  Ecliptic Seasons does, for its seasonal LoD models — does not switch the fix off.
 - Turns a mod's Mod Menu entrypoint into NeoForge's `IConfigScreenFactory`, so its settings get
   the Config button in the mod list. Mod Menu is Fabric-only, and its two interfaces are stubbed
   next to the Fabric ones. Voxy and `voxy-extra` reach the same screen through Sodium's video
   settings, which the `sodium:config_api_user` entrypoint already covers; Voxy World Gen declares
   only the Mod Menu one and had no way in at all.
 - Reimplements the `/voxy` command against NeoForge's command system.
+- Registers the client commands of the other bridged mods as they are. Fabric types them against
+  its own command source, so NeoForge's is made one, and the trees go onto NeoForge's client
+  dispatcher unchanged. Voxy SeedGen's `/voxyseedgen fill` arrives this way.
 - Adds a Chunky auto-ingest mixin targeting NeoForge's `NeoForgeWorld`, so chunks Chunky
   pre-generates reach Voxy's LoD store. Chunky loads them on the server and the client never
   receives them, which otherwise leaves the LoD with nothing to show for the run. Chunky has no
@@ -62,15 +67,18 @@ all read from whatever Voxy jar is present, so Voxy updates do not require Foxy 
 
 ## Requirements
 
-- Minecraft 26.2
+- Minecraft 26.2 or 26.1.2
 - NeoForge
 - Sodium 0.9.1
-- Voxy 0.2.18-beta (placed in the mods folder)
+- Voxy 0.2.19-beta (placed in the mods folder). Modrinth publishes it for 26.2 only. For 26.1.2,
+  build it from source: upstream's 26.1.2 port of 0.2.18 is the single commit `4643445e` on the
+  `2612` branch, and it cherry-picks onto `dev` with two trivial conflicts.
 
 ## Building
 
 ```
 ./gradlew :26.2:build
+./gradlew :26.1:build
 ```
 
 ## License

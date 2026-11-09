@@ -1,8 +1,10 @@
 package com.leclowndu93150.foxy;
 
+import com.leclowndu93150.foxy.fabricstub.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import com.leclowndu93150.foxy.loader.FoxyConfigScreens;
 import com.leclowndu93150.foxy.loader.FoxyEntrypoints;
 import com.leclowndu93150.foxy.loader.FoxyFabricApi;
+import com.mojang.brigadier.CommandDispatcher;
 import me.cortex.voxy.client.DebugEntries;
 import me.cortex.voxy.commonImpl.VoxyCommon;
 import net.neoforged.bus.api.IEventBus;
@@ -39,7 +41,15 @@ public class FoxyNeoForge {
         FoxyConfigScreens.registerAll();
     }
 
+    /**
+     * The Fabric trees go in first: Voxy registers a {@code /voxy} of its own there, and Brigadier
+     * merges same-named nodes with the later registration's executor winning, so
+     * {@link FoxyCommands} keeps the ones it reimplements.
+     */
+    @SuppressWarnings({"unchecked", "rawtypes"})
     private void onRegisterClientCommands(RegisterClientCommandsEvent event) {
+        ClientCommandRegistrationCallback.EVENT.invoke(
+                l -> l.register((CommandDispatcher) event.getDispatcher(), event.getBuildContext()));
         if (VoxyCommon.isAvailable()) {
             FoxyCommands.register(event.getDispatcher());
         }
