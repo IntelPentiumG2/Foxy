@@ -4,6 +4,7 @@ import com.leclowndu93150.foxy.fabricstub.fabric.api.client.event.lifecycle.v1.C
 import com.leclowndu93150.foxy.fabricstub.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import com.leclowndu93150.foxy.fabricstub.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.Minecraft;
+import com.leclowndu93150.foxy.fabricstub.fabric.api.networking.v1.PacketSender;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
@@ -19,6 +20,12 @@ final class FoxyFabricApiClient {
     static void init() {
         NeoForge.EVENT_BUS.addListener((ClientTickEvent.Post e) ->
                 ClientTickEvents.END_CLIENT_TICK.invoke(l -> l.onEndTick(Minecraft.getInstance())));
+
+        NeoForge.EVENT_BUS.addListener((ClientPlayerNetworkEvent.LoggingIn e) -> {
+            PacketSender sender = ClientPlayNetworking::send;
+            ClientPlayConnectionEvents.JOIN.invoke(
+                    l -> l.onPlayReady(e.getPlayer().connection, sender, Minecraft.getInstance()));
+        });
 
         NeoForge.EVENT_BUS.addListener((ClientPlayerNetworkEvent.LoggingOut e) -> {
             if (e.getPlayer() != null) {

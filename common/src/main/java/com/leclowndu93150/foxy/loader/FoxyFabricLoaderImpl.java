@@ -16,6 +16,7 @@ import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -47,6 +48,16 @@ public class FoxyFabricLoaderImpl implements FabricLoader {
         return FMLPaths.CONFIGDIR.get();
     }
 
+    @Override
+    public Path getGameDir() {
+        return FMLPaths.GAMEDIR.get();
+    }
+
+    @Override
+    public Collection<ModContainer> getAllMods() {
+        return ModList.get().getSortedMods().stream().<ModContainer>map(NeoModContainer::new).toList();
+    }
+
     private record NeoModContainer(net.neoforged.fml.ModContainer delegate) implements ModContainer {
         @Override
         public ModMetadata getMetadata() {
@@ -67,6 +78,16 @@ public class FoxyFabricLoaderImpl implements FabricLoader {
     }
 
     private record NeoModMetadata(IModInfo info) implements ModMetadata {
+        @Override
+        public String getId() {
+            return info.getModId();
+        }
+
+        @Override
+        public String getName() {
+            return info.getDisplayName();
+        }
+
         @Override
         public Version getVersion() {
             String v = info.getVersion().toString();

@@ -4,6 +4,7 @@ import com.leclowndu93150.foxy.loader.FoxyFabricLoaderImpl;
 import com.leclowndu93150.foxy.fabricstub.api.EnvType;
 
 import java.nio.file.Path;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,4 +22,8 @@ public interface FabricLoader {
     <T> List<T> getEntrypoints(String key, Class<T> type);
 
     Path getConfigDir();
+
+    Path getGameDir();
+
+    Collection<ModContainer> getAllMods();
 }
