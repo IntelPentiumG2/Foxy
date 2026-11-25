@@ -65,15 +65,18 @@ all read from whatever Voxy jar is present, so Voxy updates do not require Foxy 
 
 ## Requirements
 
-- Minecraft 26.2
+- Minecraft 26.2 or 26.1.2
 - NeoForge
 - Sodium 0.9.1
-- Voxy 0.2.18-beta (placed in the mods folder)
+- Voxy 0.2.19-beta (placed in the mods folder). Modrinth publishes it for 26.2 only. For 26.1.2,
+  build it from source: upstream's 26.1.2 port of 0.2.18 is the single commit `4643445e` on the
+  `2612` branch, and it cherry-picks onto `dev` with two trivial conflicts.
 
 ## Building
 
 ```
 ./gradlew :26.2:build
+./gradlew :26.1:build
 ```
 
 ## License
