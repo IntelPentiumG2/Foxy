@@ -17,9 +17,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -37,6 +35,15 @@ public class FoxyDependencyLocator implements IDependencyLocator {
 
     @Override
     public void scanMods(List<IModFile> loadedMods, IDiscoveryPipeline pipeline) {
+        try {
+            addNestedJars(loadedMods, pipeline);
+        } finally {
+            // Every jar Foxy patches or extracts this launch exists by now.
+            FoxyCache.prune();
+        }
+    }
+
+    private static void addNestedJars(List<IModFile> loadedMods, IDiscoveryPipeline pipeline) {
         List<IModFile> fabricMods = new ArrayList<>();
         List<IModFile> otherMods = new ArrayList<>();
         for (IModFile mod : loadedMods) {
@@ -77,7 +84,6 @@ public class FoxyDependencyLocator implements IDependencyLocator {
                 // copies resolve to different module names.
                 LOGGER.info("Skipping bundled {}: package {} is already provided by {}",
                         candidate.name(), clash.replace('/', '.'), providers.get(clash));
-                deleteQuietly(candidate.path());
                 continue;
             }
             try {
@@ -191,18 +197,9 @@ public class FoxyDependencyLocator implements IDependencyLocator {
             return null;
         }
         String name = innerPath.substring(innerPath.lastIndexOf('/') + 1);
-        Path out = Files.createTempFile("foxy-jij-", "-" + name);
-        out.toFile().deleteOnExit();
         try (InputStream is = contents.openFile(innerPath)) {
-            Files.copy(is, out, StandardCopyOption.REPLACE_EXISTING);
+            return FoxyCache.store(name, is.readAllBytes());
         }
-        return out;
-    }
-
-    private static void deleteQuietly(Path path) {
-        try {
-            Files.deleteIfExists(path);
-        } catch (IOException ignored) {}
     }
 
     @Override
