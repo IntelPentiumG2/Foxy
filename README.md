@@ -60,6 +60,10 @@ it uses over to NeoForge equivalents.
 - Registers the client commands of the other bridged mods as they are. Fabric types them against
   its own command source, so NeoForge's is made one, and the trees go onto NeoForge's client
   dispatcher unchanged. Voxy SeedGen's `/voxyseedgen fill` arrives this way.
+- Lets mod features grow in Voxy SeedGen's LoD. SeedGen paints them into a stand-in world whose
+  ground is stone all the way up and whose chunk-presence checks throw, so Dynamic Trees refused
+  every spot and a tree was never drawn. The top of each column now carries the surface SeedGen
+  draws there itself, and every chunk the stand-in is asked about is reported present.
 - Adds a Chunky auto-ingest mixin targeting NeoForge's `NeoForgeWorld`, so chunks Chunky
   pre-generates reach Voxy's LoD store. Chunky loads them on the server and the client never
   receives them, which otherwise leaves the LoD with nothing to show for the run. Chunky has no

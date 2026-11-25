@@ -6,6 +6,8 @@
   "mixins": [
     "MixinCommandSourceStack",
     "MixinServerChunkCache",
+    "seedgen.MixinPaintedTerrain",
+    "seedgen.MixinStandIn",
     "chunky.MixinForgeWorld"
   ],
   "client": [
