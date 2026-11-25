@@ -46,6 +46,11 @@ it uses over to NeoForge equivalents.
   draws its shell into its neighbours and would otherwise bake to nothing the bakery can see.
   Vanilla models are untouched — NeoForge's context-carrying overload forwards to the context-free
   one unless a model overrides it, and geometry already inside the block is left as it was built.
+  The call is redirected wherever it ends up in the bakery, so a mod that wraps it with a mixin —
+  Ecliptic Seasons does, for its seasonal LoD models — does not switch the fix off. A weighted
+  model bakes its heaviest variant rather than a random one: the LoD has one texture per block
+  state, so a roll that lands on Ecliptic Seasons' one-in-twenty spring flower otherwise puts a
+  flower on every grass block in view.
 - Turns a mod's Mod Menu entrypoint into NeoForge's `IConfigScreenFactory`, so its settings get
   the Config button in the mod list. Mod Menu is Fabric-only, and its two interfaces are stubbed
   next to the Fabric ones. Voxy and `voxy-extra` reach the same screen through Sodium's video

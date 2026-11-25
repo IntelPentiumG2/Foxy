@@ -8,7 +8,9 @@
     "MixinServerChunkCache",
     "chunky.MixinForgeWorld"
   ],
-  "client": [],
+  "client": [
+    "WeightedVariantsAccessor"
+  ],
   "server": [],
   "injectors": {
     "defaultRequire": 1
