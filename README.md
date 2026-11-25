@@ -52,6 +52,9 @@ it uses over to NeoForge equivalents.
   settings, which the `sodium:config_api_user` entrypoint already covers; Voxy World Gen declares
   only the Mod Menu one and had no way in at all.
 - Reimplements the `/voxy` command against NeoForge's command system.
+- Registers the client commands of the other bridged mods as they are. Fabric types them against
+  its own command source, so NeoForge's is made one, and the trees go onto NeoForge's client
+  dispatcher unchanged. Voxy SeedGen's `/voxyseedgen fill` arrives this way.
 - Adds a Chunky auto-ingest mixin targeting NeoForge's `NeoForgeWorld`, so chunks Chunky
   pre-generates reach Voxy's LoD store. Chunky loads them on the server and the client never
   receives them, which otherwise leaves the LoD with nothing to show for the run. Chunky has no
