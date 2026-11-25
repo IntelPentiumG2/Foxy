@@ -64,6 +64,9 @@ it uses over to NeoForge equivalents.
   ground is stone all the way up and whose chunk-presence checks throw, so Dynamic Trees refused
   every spot and a tree was never drawn. The top of each column now carries the surface SeedGen
   draws there itself, and every chunk the stand-in is asked about is reported present.
+- Ends a Voxy SeedGen tile early once the integrated server stops. SeedGen only stops its workers
+  between tiles, and in a large pack a tile can take minutes, so leaving the world sat on "Saving
+  world" until they were done. The tile is not marked written and is drawn again next time.
 - Adds a Chunky auto-ingest mixin targeting NeoForge's `NeoForgeWorld`, so chunks Chunky
   pre-generates reach Voxy's LoD store. Chunky loads them on the server and the client never
   receives them, which otherwise leaves the LoD with nothing to show for the run. Chunky has no
