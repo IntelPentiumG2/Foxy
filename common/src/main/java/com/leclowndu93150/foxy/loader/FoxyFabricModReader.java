@@ -15,6 +15,7 @@ import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.commons.ClassRemapper;
 import org.objectweb.asm.commons.Remapper;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -34,6 +35,9 @@ import java.util.zip.ZipOutputStream;
 
 public class FoxyFabricModReader implements IModFileReader {
     private static final String MODS_TOML = "META-INF/neoforge.mods.toml";
+
+    /** 1980-01-01, the earliest time a zip entry can hold. */
+    private static final long ZIP_TIME = 315532800000L;
 
     /**
      * The mods Foxy knows how to bridge. This reader sees every jar in discovery, including
@@ -135,17 +139,16 @@ public class FoxyFabricModReader implements IModFileReader {
 
     private static Path patchJar(Path original, JsonObject fmj) throws IOException {
         String modId = string(fmj, "id", "voxy");
-        Path patched = Files.createTempFile("foxy-patched-" + modId + "-", ".jar");
-        patched.toFile().deleteOnExit();
+        ByteArrayOutputStream patched = new ByteArrayOutputStream();
 
         Set<String> mixinConfigs = new HashSet<>(readMixins(fmj));
         try (ZipFile in = new ZipFile(original.toFile());
-             ZipOutputStream out = new ZipOutputStream(Files.newOutputStream(patched))) {
+             ZipOutputStream out = new ZipOutputStream(patched)) {
             var entries = in.entries();
             while (entries.hasMoreElements()) {
                 ZipEntry entry = entries.nextElement();
                 if (entry.getName().equals(MODS_TOML)) continue;
-                out.putNextEntry(new ZipEntry(entry.getName()));
+                out.putNextEntry(fixedTimeEntry(entry.getName()));
                 if (!entry.isDirectory()) {
                     try (InputStream is = in.getInputStream(entry)) {
                         if (entry.getName().endsWith(".class")) {
@@ -159,11 +162,18 @@ public class FoxyFabricModReader implements IModFileReader {
                 }
                 out.closeEntry();
             }
-            out.putNextEntry(new ZipEntry(MODS_TOML));
+            out.putNextEntry(fixedTimeEntry(MODS_TOML));
             out.write(buildModsToml(fmj).getBytes(StandardCharsets.UTF_8));
             out.closeEntry();
         }
-        return patched;
+        return FoxyCache.store("patched-" + modId + ".jar", patched.toByteArray());
+    }
+
+    /** Without a set time every entry gets "now", and identical input would never hash the same. */
+    private static ZipEntry fixedTimeEntry(String name) {
+        ZipEntry entry = new ZipEntry(name);
+        entry.setTime(ZIP_TIME);
+        return entry;
     }
 
     /**
