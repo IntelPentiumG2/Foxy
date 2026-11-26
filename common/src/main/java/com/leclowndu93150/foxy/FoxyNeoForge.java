@@ -1,6 +1,7 @@
 package com.leclowndu93150.foxy;
 
 import com.leclowndu93150.foxy.fabricstub.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
+import com.leclowndu93150.foxy.loader.FoxyCache;
 import com.leclowndu93150.foxy.loader.FoxyConfigScreens;
 import com.leclowndu93150.foxy.loader.FoxyEntrypoints;
 import com.leclowndu93150.foxy.loader.FoxyFabricApi;
@@ -18,6 +19,8 @@ import net.neoforged.neoforge.common.NeoForge;
 public class FoxyNeoForge {
 
     public FoxyNeoForge(IEventBus modBus) {
+        // Before any Voxy code runs, so RocksDB never falls back to a fresh copy in /tmp.
+        FoxyCache.preloadRocksDbNatives();
         FoxyFabricApi.init(modBus);
         modBus.addListener(this::onCommonSetup);
         modBus.addListener(this::onClientSetup);
