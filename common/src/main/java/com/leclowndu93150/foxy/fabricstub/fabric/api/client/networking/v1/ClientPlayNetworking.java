@@ -26,6 +26,12 @@ public final class ClientPlayNetworking {
         return HANDLERS.putIfAbsent(type, handler) == null;
     }
 
+    /** Whether the server we are connected to registered this payload type. */
+    public static boolean canSend(CustomPacketPayload.Type<?> type) {
+        var connection = Minecraft.getInstance().getConnection();
+        return connection != null && connection.hasChannel(type);
+    }
+
     public static void send(CustomPacketPayload payload) {
         ClientPacketDistributor.sendToServer(payload);
     }
